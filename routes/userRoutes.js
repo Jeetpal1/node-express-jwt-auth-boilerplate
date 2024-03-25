@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const RefreshToken = require("../models/refreshTokenModel");
+const ResetToken = require("../models/resetTokenModel");
 
 const router = express.Router();
 
@@ -37,6 +38,13 @@ router.post("/sign-up", async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Check if email and password are provided
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required." });
+    }
+
     // Ensure uniqueness of the email to avoid duplicate accounts.
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -69,6 +77,13 @@ router.post("/sign-up", async (req, res) => {
 router.post("/sign-in", async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // Check if email and password are provided
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required." });
+    }
 
     // Attempt to find the user by their email.
     const user = await User.findOne({ email });
@@ -126,6 +141,10 @@ router.post("/sign-in", async (req, res) => {
  */
 router.post("/token", async (req, res) => {
   const { token: refreshToken } = req.body;
+  // Check if refresh token is provided
+  if (!refreshToken) {
+    return res.status(400).json({ message: "Refresh token is required." });
+  }
 
   // Find the refresh token in the database
   const storedRefreshToken = await RefreshToken.findOne({
@@ -150,6 +169,130 @@ router.post("/token", async (req, res) => {
 
     res.json({ accessToken });
   });
+});
+
+/**
+ * Route for resetting password (forgot password).
+ * This involves:
+ * - Generating a reset token and sending it to the user's email.
+ * - Storing the reset token with an expiry date in the database.
+ */
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Check if email is provided
+    if (!email) {
+      return res.status(400).json({ message: "Email is required." });
+    }
+
+    // Find the user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      // If user not found, respond with an error
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Generate a reset token
+    const resetToken = jwt.sign(
+      { userId: user._id },
+      process.env.RESET_TOKEN_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    // Save the reset token with an expiry date in the database
+    const newResetToken = new ResetToken({
+      token: resetToken,
+      user: user._id,
+      // Set reset token to expire in 1 hour or any suitable timeframe
+      expiryDate: new Date(Date.now() + 1 * 60 * 60 * 1000),
+    });
+
+    await newResetToken.save();
+
+    // Send the reset token in the response JSON
+    res.json({ message: "Reset token generated successfully.", resetToken });
+  } catch (error) {
+    // Log the error and respond with a server error status code.
+    console.error(error);
+    res.status(500).json({ message: "Error resetting password." });
+  }
+});
+
+/**
+ * Route for resetting password with a valid reset token.
+ * This involves:
+ * - Verifying the reset token.
+ * - Updating the user's password in the database.
+ */
+router.post("/reset-password/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    // Check if password is provided
+    if (!password) {
+      return res.status(400).json({ message: "Password is required." });
+    }
+
+    // Find the reset token in the database
+    const storedResetToken = await ResetToken.findOne({ token });
+    if (!storedResetToken || storedResetToken.expiryDate <= new Date()) {
+      return res.status(401).send("Invalid or expired reset token");
+    }
+
+    // Verify the reset token
+    jwt.verify(token, process.env.RESET_TOKEN_SECRET, async (err, decoded) => {
+      if (err) {
+        return res.status(403).send("Reset token verification failed");
+      }
+
+      // Find the user associated with the reset token
+      const user = await User.findById(decoded.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      // Securely hash the new password before updating it in the database
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Update the user's password
+      user.password = hashedPassword;
+      await user.save();
+
+      // Delete the reset token from the database
+      await ResetToken.findOneAndDelete({ token });
+
+      res.json({ message: "Password reset successful." });
+    });
+  } catch (error) {
+    // Log the error and respond with a server error status code.
+    console.error(error);
+    res.status(500).json({ message: "Error resetting password." });
+  }
+});
+
+/**
+ * Route to delete a user.
+ * - Requires authentication.
+ * - Deletes the user and associated refresh tokens from the database.
+ */
+router.delete("/delete-user", authenticateToken, async (req, res) => {
+  try {
+    // Get the user ID from the authenticated request.
+    const userId = req.user.userId;
+
+    // Delete the user from the database.
+    await User.findByIdAndDelete(userId);
+
+    // Delete associated refresh tokens from the database.
+    await RefreshToken.deleteMany({ user: userId });
+
+    res.status(200).json({ message: "User deleted successfully." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error deleting user." });
+  }
 });
 
 /**
