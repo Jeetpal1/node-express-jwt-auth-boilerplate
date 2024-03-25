@@ -1,0 +1,25 @@
+version: "3.9"  # Use version 3.9 of the Docker Compose file format
+
+networks:
+  default:  # Define the default network
+    name: jwt  # Name the default network 'jwt'
+
+services:
+  mongo:
+    image: mongo:4.4  # Specify the Mongo image version to ensure compatibility
+    container_name: mongo  # Name the container for easier reference
+    restart: unless-stopped  # Restart policy to handle unexpected crashes
+
+    ports:
+      - "27017:27017"  # Map the default Mongo port from the container to the host
+
+    volumes:
+      - mongo_data:/data/db  # Use a named volume for data persistence
+
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=mongo  # Set the default Mongo root username
+      - MONGO_INITDB_ROOT_PASSWORD=mongo  # Set the default Mongo root password
+
+volumes:
+  mongo_data:  # Define the named volume
+    driver: local  # Use the local volume driver
