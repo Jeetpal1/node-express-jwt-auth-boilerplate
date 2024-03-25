@@ -52,9 +52,10 @@ Follow these steps to clone the boilerplate, set up your environment, and run th
     MONGODB_URI=your_mongodb_uri
     JWT_SECRET=your_jwt_secret
     REFRESH_TOKEN_SECRET=your_refresh_token
+    RESET_TOKEN_SECRET=your_reset_token_secret
     ```
 
-    Please Note: To create secrets for the JWT_SECRET and REFRESH_TOKEN_SECRET env. variables, you can use `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+    Please Note: To create secrets for the JWT_SECRET, REFRESH_TOKEN_SECRET and RESET_TOKEN_SECRET env. variables, you can use `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
 
 4.  **Start the Server**
 
