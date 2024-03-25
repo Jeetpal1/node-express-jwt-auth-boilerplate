@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, "Password is required"], // Ensure password is provided.
+    required: [true, "Password is required"],
     // Note: Hash passwords before storing using a pre-save hook or similar.
   },
 });

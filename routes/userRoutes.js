@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
+const RefreshToken = require("../models/refreshTokenModel");
 
 const router = express.Router();
 
@@ -60,36 +61,95 @@ router.post("/sign-up", async (req, res) => {
 });
 
 /**
- * Route to authenticate a user. This involves:
- * - Verifying the user's credentials.
- * - Generating a JWT token for the session if credentials are valid.
+ * Route to authenticate a user and provide JWT and refresh tokens.
+ * - Validates user credentials.
+ * - Issues a JWT for valid credentials.
+ * - Generates a refresh token for renewing the JWT.
  */
 router.post("/sign-in", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check for the existence of the user by email.
+    // Attempt to find the user by their email.
     const user = await User.findOne({ email });
     if (!user) {
+      // Respond with an error if the user doesn't exist.
       return res.status(401).json({ message: "Invalid credentials." });
     }
 
-    // Compare the provided password with the stored hash.
+    // Verify the password against the hashed password in the database.
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      // If the password doesn't match, respond with an error.
       return res.status(401).json({ message: "Invalid credentials." });
     }
 
-    // Generate a JWT token as part of the successful login response.
+    // User credentials are valid, proceed to generate the JWT.
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
-    res.json({ message: "User logged in successfully.", token });
+    // Generate a separate refresh token that doesn't expire quickly.
+    const refreshToken = jwt.sign(
+      { userId: user._id },
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    // Save the refresh token with an expiry date in the database
+    const newRefreshToken = new RefreshToken({
+      token: refreshToken,
+      user: user._id,
+      // Set refresh token to expire in 14 days or any suitable timeframe
+      expiryDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+    });
+
+    await newRefreshToken.save();
+
+    // Respond with both access and refresh tokens.
+    res.json({
+      message: "User logged in successfully.",
+      token, // Access token for API authentication.
+      refreshToken, // Refresh token to obtain new access tokens after expiry.
+    });
   } catch (error) {
+    // Log the error and respond with a server error status code.
     console.error(error);
     res.status(500).json({ message: "Error signing in user." });
   }
+});
+
+/**
+ * Route for refreshing the JWT token. This involves:
+ * - Checking if the refresh token is provided.
+ * - Verifying the refresh token.
+ * - If the refresh token is valid, creating and returning a new access token.
+ */
+router.post("/token", async (req, res) => {
+  const { token: refreshToken } = req.body;
+
+  // Find the refresh token in the database
+  const storedRefreshToken = await RefreshToken.findOne({
+    token: refreshToken,
+  });
+  if (!storedRefreshToken || storedRefreshToken.expiryDate <= new Date()) {
+    return res.status(401).send("Invalid or expired refresh token");
+  }
+
+  // Verify the refresh token
+  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(403).send("Refresh token verification failed");
+    }
+
+    // If the refresh token is valid, create a new access token
+    const accessToken = jwt.sign(
+      { userId: decoded.userId },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.json({ accessToken });
+  });
 });
 
 /**

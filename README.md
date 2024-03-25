@@ -27,41 +27,44 @@ Follow these steps to clone the boilerplate, set up your environment, and run th
 
 ### Setup Instructions
 
-1. **Clone the Repository**
+1.  **Clone the Repository**
 
-   Clone this repository to your local machine to get started.
+    Clone this repository to your local machine to get started.
 
-   ```bash
-   git clone https://github.com/jeetpal1/node-express-jwt-auth-boilerplate.git
-   cd node-express-jwt-auth-boilerplate
-   ```
+    ```bash
+    git clone https://github.com/jeetpal1/node-express-jwt-auth-boilerplate.git
+    cd node-express-jwt-auth-boilerplate
+    ```
 
-2. **Install Dependencies**
+2.  **Install Dependencies**
 
-   Install the required npm packages.
+    Install the required npm packages.
 
-   ```bash
-   npm install
-   ```
+    ```bash
+    npm install
+    ```
 
-3. **Configure Environment**
+3.  **Configure Environment**
 
-   Create a `.env` file in the root directory. Add your MongoDB URI and a secret for JWT.
+    Create a `.env` file in the root directory. Add your MongoDB URI and a secret for JWT.
 
-   ```env
-   MONGODB_URI=your_mongodb_uri
-   JWT_SECRET=your_jwt_secret
-   ```
+    ```env
+    MONGODB_URI=your_mongodb_uri
+    JWT_SECRET=your_jwt_secret
+    REFRESH_TOKEN_SECRET=your_refresh_token
+    ```
 
-4. **Start the Server**
+    Please Note: To create secrets for the JWT_SECRET and REFRESH_TOKEN_SECRET env. variables, you can use `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
 
-   Run the application.
+4.  **Start the Server**
 
-   ```bash
-   npm start
-   ```
+    Run the application.
 
-   Your server will start, typically on port 3000.
+    ```bash
+    npm start
+    ```
+
+    Your server will start, typically on port 3000.
 
 ## Application Structure
 
@@ -83,7 +86,7 @@ JWT is an open standard (RFC 7519) that defines a compact way of securely transm
 - **Sign-Up**: The user provides an email and password. The password is hashed and stored in MongoDB along with the email.
 - **Sign-In**: The user submits their credentials. If the credentials match, a JWT token is generated and returned, granting access to protected routes.
 
-## For Hiring Managers
+## For Noobs
 
 This boilerplate demonstrates:
 
