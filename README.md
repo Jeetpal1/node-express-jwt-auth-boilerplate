@@ -106,6 +106,7 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Screenshots of the working routes
 Sign-up Endpoint:
+
 Method: POST
 URL: http://localhost:port/sign-up
 Body (JSON): `{
@@ -115,6 +116,7 @@ Body (JSON): `{
 ![image](https://github.com/Jeetpal1/node-express-jwt-auth-boilerplate/assets/70360391/d561e37a-7879-4e82-b3dd-65719d5d4b75)
 
 Sign-in Endpoint:
+
 Method: POST
 URL: http://localhost:port/sign-in
 Body (JSON):`
