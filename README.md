@@ -86,7 +86,7 @@ JWT is an open standard (RFC 7519) that defines a compact way of securely transm
 - **Sign-Up**: The user provides an email and password. The password is hashed and stored in MongoDB along with the email.
 - **Sign-In**: The user submits their credentials. If the credentials match, a JWT token is generated and returned, granting access to protected routes.
 
-## For Noobs
+## For Beginners
 
 This boilerplate demonstrates:
 
@@ -95,14 +95,6 @@ This boilerplate demonstrates:
 - Ability to integrate and use MongoDB with Mongoose for data storage and retrieval.
 - Best practices in security, such as environment variable management and password hashing.
 - Clear and maintainable code structure, suitable for building upon in larger projects.
-
-## Contributing
-
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](#).
-
-## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
 
 ## User Routes Explanation
 
@@ -190,7 +182,13 @@ Body (JSON):`
 }`
 ![image](https://github.com/Jeetpal1/node-express-jwt-auth-boilerplate/assets/70360391/ee9b6ec1-0d10-41da-80bd-daefb53024fb)
 
+## Contributing
 
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](#).
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Acknowledgments
 
