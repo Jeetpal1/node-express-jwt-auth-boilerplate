@@ -105,8 +105,33 @@ Contributions, issues, and feature requests are welcome! Feel free to check the 
 Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Screenshots of the working routes
+Sign-up Endpoint:
+Method: POST
+URL: http://localhost:port/sign-up
+Body (JSON): `{
+  "email": "example@example.com",
+  "password": "yourpassword"
+}`
 ![image](https://github.com/Jeetpal1/node-express-jwt-auth-boilerplate/assets/70360391/d561e37a-7879-4e82-b3dd-65719d5d4b75)
+
+Sign-in Endpoint:
+Method: POST
+URL: http://localhost:port/sign-in
+Body (JSON):`
+{
+  "email": "example@example.com",
+  "password": "yourpassword"
+}`
 ![image](https://github.com/Jeetpal1/node-express-jwt-auth-boilerplate/assets/70360391/38402a86-a6ad-4b5d-b620-a09ffec865da)
+
+Reset Password Endpoint:
+
+Method: POST
+URL: http://localhost:port/reset-password
+Body (JSON):`
+{
+  "email": "example@example.com"
+}`
 ![image](https://github.com/Jeetpal1/node-express-jwt-auth-boilerplate/assets/70360391/ee9b6ec1-0d10-41da-80bd-daefb53024fb)
 
 
