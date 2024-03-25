@@ -104,6 +104,60 @@ Contributions, issues, and feature requests are welcome! Feel free to check the 
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
+## User Routes Explanation
+
+The `userRoutes.js` file defines routes and middleware functions for user authentication, registration, password management, and user deletion. Here's a breakdown of each section and its functionality:
+
+### Dependencies
+- `express`: For creating the router.
+- `bcrypt`: For hashing passwords.
+- `jsonwebtoken`: For generating and verifying JWT tokens.
+- `User`, `RefreshToken`, `ResetToken`: Imported models representing user, refresh token, and reset token data.
+
+### Middleware
+- `authenticateToken`: Middleware function to validate JWT tokens in the authorization header. Ensures only authenticated users can access certain routes.
+
+### Route Handlers
+1. **Register a New User** (`POST /sign-up`):
+   - Checks if email and password are provided.
+   - Ensures uniqueness of the email to avoid duplicate accounts.
+   - Hashes the password before storing it in the database.
+   - Creates and stores the new user in the database.
+
+2. **Authenticate User** (`POST /sign-in`):
+   - Validates user credentials (email and password).
+   - Issues a JWT for valid credentials.
+   - Generates a refresh token for renewing the JWT.
+   - Saves the refresh token with an expiry date in the database.
+
+3. **Refresh JWT Token** (`POST /token`):
+   - Checks if a refresh token is provided.
+   - Verifies the refresh token.
+   - Creates and returns a new access token if the refresh token is valid.
+
+4. **Reset Password** (`POST /reset-password`):
+   - Generates a reset token and sends it to the user's email.
+   - Stores the reset token with an expiry date in the database.
+
+5. **Reset Password with Token** (`POST /reset-password/:token`):
+   - Verifies the reset token.
+   - Updates the user's password in the database.
+
+6. **Delete User** (`DELETE /delete-user`):
+   - Requires authentication.
+   - Deletes the user and associated refresh tokens from the database.
+
+7. **Protected Route** (`GET /protected`):
+   - Example of a protected route that requires token authentication. Accessible only to requests with a valid JWT token.
+
+### Models
+- `RefreshTokenModel`: Model representing refresh tokens.
+- `ResetTokenModel`: Model representing reset tokens.
+- `UserModel`: Model representing user data.
+
+These routes and middleware functions provide functionality for user authentication, registration, password management, and user deletion, ensuring secure user interactions with the application.
+
+
 ## Screenshots of the working routes
 Sign-up Endpoint:
 
